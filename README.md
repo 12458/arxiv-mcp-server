@@ -1,7 +1,9 @@
-# ArXiv MCP Server 📚 
-
 [![Python Version](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+<a href="https://glama.ai/mcp/servers/04dtxi5i5n"><img width="380" height="200" src="https://glama.ai/mcp/servers/04dtxi5i5n/badge" alt="ArXiv Server MCP server" /></a>
+
+
 
 > 🔍 Enable AI assistants to search and access arXiv papers through a simple MCP interface.
 
@@ -9,11 +11,8 @@ The ArXiv MCP Server provides a bridge between AI assistants and arXiv's researc
 
 <div align="center">
   
-📖 **[Documentation](https://github.com/blazickjp/arxiv-mcp-server/wiki)** • 
 🤝 **[Contribute](https://github.com/blazickjp/arxiv-mcp-server/blob/main/CONTRIBUTING.md)** • 
 📝 **[Report Bug](https://github.com/blazickjp/arxiv-mcp-server/issues)**
-
-<a href="https://glama.ai/mcp/servers/04dtxi5i5n"><img width="380" height="200" src="https://glama.ai/mcp/servers/04dtxi5i5n/badge" alt="ArXiv Server MCP server" /></a>
 
 </div>
 
