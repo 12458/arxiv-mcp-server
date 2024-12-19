@@ -13,6 +13,8 @@ The ArXiv MCP Server provides a bridge between AI assistants and arXiv's researc
 🤝 **[Contribute](https://github.com/blazickjp/arxiv-mcp-server/blob/main/CONTRIBUTING.md)** • 
 📝 **[Report Bug](https://github.com/blazickjp/arxiv-mcp-server/issues)**
 
+<a href="https://glama.ai/mcp/servers/04dtxi5i5n"><img width="380" height="200" src="https://glama.ai/mcp/servers/04dtxi5i5n/badge" alt="ArXiv Server MCP server" /></a>
+
 </div>
 
 ## ✨ Core Features
