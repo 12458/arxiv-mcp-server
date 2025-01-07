@@ -13,7 +13,9 @@ from .config import Settings
 from .tools import handle_search, handle_download, handle_list_papers, handle_read_paper
 from .tools import search_tool, download_tool, list_tool, read_tool
 from .resources import PaperManager
-from mcp.server import Server, InitializationOptions, NotificationOptions, stdio_server
+from mcp.server import Server, NotificationOptions
+from mcp.server.models import InitializationOptions
+from mcp.server.stdio import stdio_server
 
 # Initialize server settings and paper manager
 settings = Settings()

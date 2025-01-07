@@ -6,7 +6,7 @@ import arxiv
 import pymupdf4llm
 import aiofiles
 import logging
-from mcp.server import AnyUrl
+from pydantic import AnyUrl
 import mcp.types as types
 from ..config import Settings
 
