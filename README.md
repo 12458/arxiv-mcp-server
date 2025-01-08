@@ -1,3 +1,4 @@
+[![Twitter Follow](https://img.shields.io/twitter/follow/JoeBlazick?style=social)](https://twitter.com/JoeBlazick)
 [![smithery badge](https://smithery.ai/badge/arxiv-mcp-server)](https://smithery.ai/server/arxiv-mcp-server)
 [![Python Version](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -38,7 +39,7 @@ npx -y @smithery/cli install arxiv-mcp-server --client claude
 Install using uv:
 
 ```bash
-uv pip install git+https://github.com/blazickjp/arxiv-mcp-server.git
+uv tool install arxiv-mcp-server
 ```
 
 For development:
@@ -66,6 +67,26 @@ Add this configuration to your MCP client config file:
         "arxiv-mcp-server": {
             "command": "uv",
             "args": [
+                "tool",
+                "run",
+                "arxiv-mcp-server",
+                "--storage-path", "/path/to/paper/storage"
+            ]
+        }
+    }
+}
+```
+
+For Development:
+
+```json
+{
+    "mcpServers": {
+        "arxiv-mcp-server": {
+            "command": "uv",
+            "args": [
+                "--directory",
+                "path/to/cloned/arxiv-mcp-server",
                 "run",
                 "arxiv-mcp-server",
                 "--storage-path", "/path/to/paper/storage"
