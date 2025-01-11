@@ -39,6 +39,7 @@ test = [
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
+asyncio_fixture_loop_scope = "function"  # Added this line
 testpaths = ["tests"]
 addopts = "-v --cov=arxiv_mcp_server"
 

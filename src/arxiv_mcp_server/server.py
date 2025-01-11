@@ -12,6 +12,7 @@ from typing import Dict, Any, List
 from .config import Settings
 from .tools import handle_search, handle_download, handle_list_papers, handle_read_paper
 from .tools import search_tool, download_tool, list_tool, read_tool
+from .prompts import handle_list_prompts, handle_get_prompt
 from .resources import PaperManager
 from mcp.server import Server, NotificationOptions
 from mcp.server.models import InitializationOptions
@@ -27,32 +28,24 @@ logger.setLevel(logging.INFO)
 # Initialize MCP server
 server = Server(name=settings.APP_NAME)
 
+# Set up server capabilities
+server.capabilities = {
+    "prompts": {},  # Enable prompts capability
+    "tools": {},    # Enable tools capability
+}
 
-# @server.list_resources()
-# async def list_resources() -> List[types.Resource]:
-#     """List available paper resources."""
-#     logger.info("Listing resources")
-#     resources = await paper_manager.list_resources()
-#     logger.info(f"Found {len(resources)} resources")
-#     return resources
-
-
-# @server.read_resource()
-# async def read_resource(uri: AnyUrl) -> str:
-#     """Read the content of a paper resource."""
-#     assert uri.path is not None
-#     paper_id = Path(uri.path).stem
-#     return await paper_manager.get_paper_content(paper_id)
+@server.list_prompts()
+async def list_prompts() -> Dict[str, List[types.Prompt]]:
+    """List available prompts."""
+    return await handle_list_prompts()
 
 
-# @server.set_logging_level()
-# async def set_logging_level(level: types.LoggingLevel) -> types.EmptyResult:
-#     """Set the server logging level."""
-#     logger.setLevel(level.upper())
-#     await server.request_context.session.send_log_message(
-#         level="debug", data=f"Log level set to {level}", logger="arxiv-mcp-server"
-#     )
-#     return types.EmptyResult()
+@server.get_prompt()
+async def get_prompt(
+    name: str, arguments: Dict[str, Any]
+) -> Dict[str, List[Dict[str, Any]]]:
+    """Get a specific prompt with arguments."""
+    return await handle_get_prompt(name, arguments)
 
 
 @server.list_tools()

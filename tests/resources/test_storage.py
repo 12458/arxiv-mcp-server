@@ -3,7 +3,7 @@
 import pytest
 import aiofiles
 from unittest.mock import patch
-from arxiv_mcp_server.resources.storage import PaperStorage
+from arxiv_mcp_server.resources import PaperStorage
 from arxiv_mcp_server.config import Settings
 from pathlib import Path
 
