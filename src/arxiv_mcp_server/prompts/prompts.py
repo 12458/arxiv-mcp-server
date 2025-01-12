@@ -1,17 +1,12 @@
-"""Prompt definitions and handlers for arXiv MCP server."""
+"""Prompt definitions for arXiv MCP server."""
 
-from typing import Dict, Any, List
-import logging
 from mcp.types import (
     Prompt, 
     PromptArgument,
     PromptMessage,
     TextContent,
-    EmbeddedResource,
-    TextResourceContents,
+    GetPromptResult
 )
-
-logger = logging.getLogger(__name__)
 
 # Define all prompts
 PROMPTS = {

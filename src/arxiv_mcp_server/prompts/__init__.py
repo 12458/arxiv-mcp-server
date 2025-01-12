@@ -1,6 +1,5 @@
-"""Prompts package."""
+"""Prompt handling functionality for arXiv MCP server."""
 
-from .handlers import handle_list_prompts, handle_get_prompt
-from .prompts import PROMPTS
+from .handlers import list_prompts, get_prompt
 
-__all__ = ['handle_list_prompts', 'handle_get_prompt', 'PROMPTS']
+__all__ = ['list_prompts', 'get_prompt']

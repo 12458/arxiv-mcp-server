@@ -1,48 +1,34 @@
 """Handlers for prompt-related requests."""
 
-import logging
-from typing import Dict, Any, List
+from typing import List, Dict
 from mcp.types import (
     Prompt,
     PromptMessage,
     TextContent,
-    EmbeddedResource,
-    TextResourceContents,
+    GetPromptResult
 )
 from .prompts import PROMPTS
-from ..resources import PaperManager
 
-logger = logging.getLogger(__name__)
-
-# Initialize paper manager singleton
-paper_manager = None
-
-def get_paper_manager() -> PaperManager:
-    """Get or create paper manager instance."""
-    global paper_manager
-    if paper_manager is None:
-        paper_manager = PaperManager()
-    return paper_manager
-
-async def handle_list_prompts() -> Dict[str, List[Prompt]]:
+async def list_prompts() -> List[Prompt]:
     """Handle prompts/list request."""
-    return {"prompts": list(PROMPTS.values())}
+    return list(PROMPTS.values())
 
-async def handle_get_prompt(name: str, arguments: Dict[str, Any]) -> Dict[str, List[PromptMessage]]:
+async def get_prompt(name: str, arguments: Dict[str, str] | None = None) -> GetPromptResult:
     """Handle prompts/get request."""
-    prompt = PROMPTS.get(name)
-    if not prompt:
+    if name not in PROMPTS:
         raise ValueError(f"Prompt not found: {name}")
+        
+    prompt = PROMPTS[name]
+    if arguments is None:
+        raise ValueError(f"No arguments provided for prompt: {name}")
 
     # Validate required arguments
-    for arg in prompt.arguments or []:
-        if arg.required and arg.name not in arguments:
-            raise KeyError(f"Missing required argument: {arg.name}")
-
-    messages = []
-    
-    # Format basic prompt message
+    for arg in prompt.arguments:
+        if arg.required and (arg.name not in arguments or not arguments.get(arg.name)):
+            raise ValueError(f"Missing required argument: {arg.name}")
+        
     if name == "research-discovery":
+        topic = arguments.get("topic", "")
         expertise = arguments.get("expertise_level", "intermediate")
         time_period = arguments.get("time_period", "")
         
@@ -52,107 +38,54 @@ async def handle_get_prompt(name: str, arguments: Dict[str, Any]) -> Dict[str, L
             "expert": "We'll dive deep into technical details."
         }.get(expertise, "We'll focus on recent developments.")
         
-        messages.append(PromptMessage(
-            role="user",
-            content=TextContent(
-                type="text",
-                text=f"""I'll help you explore research papers on {arguments['topic']}.
-                {f'Time period: {time_period}' if time_period else ''}
-                {guide}
-                
-                What specific aspects interest you most?"""
-            )
-        ))
+        return GetPromptResult(
+            messages=[
+                PromptMessage(
+                    role="user",
+                    content=TextContent(
+                        type="text",
+                        text=f"Help me explore research papers on {topic}. "
+                        f"{f'Time period: {time_period}. ' if time_period else ''}"
+                        f"{guide}\n\nWhat specific aspects interest you most?"
+                    )
+                )
+            ]
+        )
 
     elif name == "paper-analysis":
-        paper_id = arguments['paper_id']
+        paper_id = arguments.get("paper_id", "")
         focus = arguments.get("focus_area", "complete")
         
-        messages.append(PromptMessage(
-            role="user",
-            content=TextContent(
-                type="text",
-                text=f"Let's analyze paper {paper_id} with focus on {focus}."
-            )
-        ))
-        
-        # Add paper content if available
-        try:
-            content = await get_paper_manager().get_paper_content(paper_id)
-            if content:
-                messages.append(PromptMessage(
+        return GetPromptResult(
+            messages=[
+                PromptMessage(
                     role="user",
-                    content=EmbeddedResource(
-                        type="resource",
-                        resource=TextResourceContents(
-                            uri=f"arxiv://{paper_id}",
-                            text=content,
-                            mimeType="text/markdown"
-                        )
-                    )
-                ))
-            else:
-                messages.append(PromptMessage(
-                    role="assistant",
                     content=TextContent(
                         type="text",
-                        text=f"I'll need to download this paper first."
+                        text=f"Analyze paper {paper_id} with a focus on {focus}. "
+                        f"Please provide a detailed breakdown of the paper's content, "
+                        f"methodology, and key findings."
                     )
-                ))
-        except Exception as e:
-            logger.error(f"Error accessing paper {paper_id}: {str(e)}")
-            messages.append(PromptMessage(
-                role="assistant",
-                content=TextContent(
-                    type="text",
-                    text=f"There was an issue accessing the paper: {str(e)}"
                 )
-            ))
-
+            ]
+        )
+        
     elif name == "literature-synthesis":
+        paper_ids = arguments.get("paper_ids", "")
         synthesis_type = arguments.get("synthesis_type", "comprehensive")
-        paper_ids = arguments["paper_ids"]
         
-        messages.append(PromptMessage(
-            role="user",
-            content=TextContent(
-                type="text",
-                text=f"Let's synthesize findings from: {', '.join(paper_ids)}"
-            )
-        ))
-        
-        # Add paper contents
-        for paper_id in paper_ids:
-            try:
-                content = await get_paper_manager().get_paper_content(paper_id)
-                if content:
-                    messages.append(PromptMessage(
-                        role="user",
-                        content=EmbeddedResource(
-                            type="resource",
-                            resource=TextResourceContents(
-                                uri=f"arxiv://{paper_id}",
-                                text=content,
-                                mimeType="text/markdown"
-                            )
-                        )
-                    ))
-                else:
-                    messages.append(PromptMessage(
-                        role="assistant",
-                        content=TextContent(
-                            type="text",
-                            text=f"Need to download paper {paper_id} first."
-                        )
-                    ))
-            except Exception as e:
-                logger.error(f"Error accessing paper {paper_id}: {str(e)}")
-                messages.append(PromptMessage(
-                    role="assistant",
+        return GetPromptResult(
+            messages=[
+                PromptMessage(
+                    role="user",
                     content=TextContent(
                         type="text",
-                        text=f"Error accessing paper {paper_id}: {str(e)}"
+                        text=f"Synthesize the findings from these papers: {paper_ids}. "
+                        f"Focus on creating a {synthesis_type} analysis that highlights "
+                        f"key themes, methodological approaches, and research implications."
                     )
-                ))
-
-    return {"messages": messages}
+                )
+            ]
+        )
+    
+    raise ValueError("Prompt implementation not found")
