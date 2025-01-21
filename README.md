@@ -24,6 +24,7 @@ The ArXiv MCP Server provides a bridge between AI assistants and arXiv's researc
 - 📄 **Paper Access**: Download and read paper content
 - 📋 **Paper Listing**: View all downloaded papers
 - 🗃️ **Local Storage**: Papers are saved locally for faster access
+- 📝 **Prompts**: A Set of Research Prompts
 
 ## 🚀 Quick Start
 
