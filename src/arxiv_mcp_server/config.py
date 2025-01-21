@@ -9,7 +9,7 @@ class Settings(BaseSettings):
     """Server configuration settings."""
 
     APP_NAME: str = "arxiv-mcp-server"
-    APP_VERSION: str = "0.2.4"
+    APP_VERSION: str = "0.2.6"
     MAX_RESULTS: int = 50
     BATCH_SIZE: int = 20
     REQUEST_TIMEOUT: int = 60
@@ -20,37 +20,40 @@ class Settings(BaseSettings):
     @property
     def STORAGE_PATH(self) -> Path:
         """Get the resolved storage path and ensure it exists.
-        
+
         Returns:
             Path: The absolute storage path.
         """
-        path = self._get_storage_path_from_args() or Path.home() / ".arxiv-mcp-server" / "papers"
+        path = (
+            self._get_storage_path_from_args()
+            or Path.home() / ".arxiv-mcp-server" / "papers"
+        )
         path = path.resolve()
         path.mkdir(parents=True, exist_ok=True)
         return path
 
     def _get_storage_path_from_args(self) -> Path | None:
         """Extract storage path from command line arguments.
-        
+
         Returns:
             Path | None: The storage path if specified in arguments, None otherwise.
         """
         args = sys.argv[1:]
-        
+
         # If not enough arguments
         if len(args) < 2:
             return None
-            
+
         # Look for the --storage-path option
         try:
-            storage_path_index = args.index('--storage-path')
+            storage_path_index = args.index("--storage-path")
         except ValueError:
             return None
-            
+
         # Early return if --storage-path is the last argument
         if storage_path_index + 1 >= len(args):
             return None
-            
+
         # Try to resolve the path
         try:
             path = Path(args[storage_path_index + 1])
@@ -62,6 +65,5 @@ class Settings(BaseSettings):
         except OSError as e:
             # OSError: If the path contains invalid characters or is too long
             logger.warning(f"Invalid storage path: {e}")
-        
-        return None
 
+        return None
