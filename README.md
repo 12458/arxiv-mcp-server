@@ -138,6 +138,31 @@ result = await call_tool("read_paper", {
 })
 ```
 
+## 📝 Research Prompts
+
+The server offers specialized prompts to help analyze academic papers:
+
+### Paper Analysis Prompt
+A comprehensive workflow for analyzing academic papers that only requires a paper ID:
+
+```python
+result = await call_prompt("deep-paper-analysis", {
+    "paper_id": "2401.12345"
+})
+```
+
+This prompt includes:
+- Detailed instructions for using available tools (list_papers, download_paper, read_paper, search_papers)
+- A systematic workflow for paper analysis
+- Comprehensive analysis structure covering:
+  - Executive summary
+  - Research context
+  - Methodology analysis
+  - Results evaluation
+  - Practical and theoretical implications
+  - Future research directions
+  - Broader impacts
+
 ## ⚙️ Configuration
 
 Configure through environment variables:
