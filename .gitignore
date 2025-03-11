@@ -20,6 +20,7 @@ wheels/
 .installed.cfg
 *.egg
 *.coverage
+*.DS_Store
 
 # Virtual Environment
 venv/
