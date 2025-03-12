@@ -3,6 +3,9 @@
 import sys
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from pathlib import Path
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class Settings(BaseSettings):
