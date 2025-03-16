@@ -187,7 +187,7 @@ Released under the MIT License. See the LICENSE file for details.
 
 <div align="center">
 
-Made with ❤️ by the Pear Labs Team
+Made with ❤️ by the Pearl Labs Team
 
 <a href="https://glama.ai/mcp/servers/04dtxi5i5n"><img width="380" height="200" src="https://glama.ai/mcp/servers/04dtxi5i5n/badge" alt="ArXiv Server MCP server" /></a>
 </div>
