@@ -23,7 +23,7 @@ async def test_download_paper_lifecycle(mocker, temp_storage_path):
     # Mock PDF to markdown conversion to happen immediately
     async def mock_convert(paper_id, pdf_path):
         md_path = get_paper_path(paper_id, ".md")
-        with open(md_path, "w") as f:
+        with open(md_path, "w", encoding="utf-8") as f:
             f.write("# Test Paper\nConverted content")
         if paper_id in conversion_statuses:
             status = conversion_statuses[paper_id]
@@ -55,7 +55,7 @@ async def test_download_existing_paper(temp_storage_path):
     
     # Create test markdown file
     md_path.parent.mkdir(parents=True, exist_ok=True)
-    with open(md_path, "w") as f:
+    with open(md_path, "w", encoding="utf-8") as f:
         f.write("# Existing Paper\nTest content")
     
     response = await handle_download({"paper_id": paper_id})
