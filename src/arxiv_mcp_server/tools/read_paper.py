@@ -49,7 +49,7 @@ async def handle_read_paper(arguments: Dict[str, Any]) -> List[types.TextContent
             ]
 
         # Get paper content
-        content = Path(settings.STORAGE_PATH, f"{paper_id}.md").read_text()
+        content = Path(settings.STORAGE_PATH, f"{paper_id}.md").read_text(encoding="utf-8")
 
         return [
             types.TextContent(
