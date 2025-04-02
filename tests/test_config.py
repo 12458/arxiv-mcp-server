@@ -2,10 +2,9 @@
 
 import os
 import sys
-import pytest
-from unittest.mock import patch, MagicMock
 from pathlib import Path
 from arxiv_mcp_server.config import Settings
+from unittest.mock import patch
 
 
 @patch.object(Path, "mkdir")
