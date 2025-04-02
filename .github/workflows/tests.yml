@@ -57,13 +57,5 @@ jobs:
       if: runner.os == 'Windows' 
       run: |
         pytest --cov=./ --cov-report=xml -v
+
         
-    # Upload coverage to Codecov
-    - name: Upload coverage to Codecov
-      if: runner.os == 'Linux' && matrix.python-version == '3.11'
-      uses: codecov/codecov-action@v3
-      with:
-        token: ${{ secrets.CODECOV_TOKEN }}
-        file: ./coverage.xml
-        flags: unittests
-        fail_ci_if_error: false 
