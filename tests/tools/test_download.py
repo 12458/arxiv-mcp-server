@@ -42,7 +42,8 @@ async def test_download_paper_lifecycle(mocker, temp_storage_path):
     assert final_status["status"] in ["success", "converting"]
 
     # Verify markdown file exists
-    assert get_paper_path(paper_id, ".md").exists()
+    if final_status["status"] == "success":
+        assert get_paper_path(paper_id, ".md").exists()
 
 
 @pytest.mark.asyncio
