@@ -36,6 +36,9 @@ test = [
     "pytest-mock>=3.10.0",
     "aioresponses>=0.7.6"
 ]
+dev = [
+    "black>=23.3.0"
+]
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
@@ -51,3 +54,21 @@ packages = ["src/arxiv_mcp_server"]
 
 [tool.hatch.metadata]
 allow-direct-references = true
+
+[tool.black]
+line-length = 88
+target-version = ["py311"]
+include = '\.pyi?$'
+exclude = '''
+/(
+    \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | _build
+  | buck-out
+  | build
+  | dist
+)/
+'''
