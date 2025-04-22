@@ -74,7 +74,6 @@ def convert_pdf_to_markdown(paper_id: str, pdf_path: Path) -> None:
             status.completed_at = datetime.now()
 
         # Clean up PDF after successful conversion
-        pdf_path.unlink()
         logger.info(f"Conversion completed for {paper_id}")
 
     except Exception as e:
