@@ -43,7 +43,6 @@ class PaperManager:
             async with aiofiles.open(paper_md_path, "w", encoding="utf-8") as f:
                 await f.write(markdown)
 
-            paper_pdf_path.unlink()  # Remove PDF after conversion
             return True
 
         except StopIteration:
