@@ -31,14 +31,6 @@ The ArXiv MCP Server provides a bridge between AI assistants and arXiv's researc
 
 ## 🚀 Quick Start
 
-### Installing via Smithery
-
-To install ArXiv Server for Claude Desktop automatically via [Smithery](https://smithery.ai/server/arxiv-mcp-server):
-
-```bash
-npx -y @smithery/cli install arxiv-mcp-server --client claude
-```
-
 ### Installing Manually
 Install using uv:
 
