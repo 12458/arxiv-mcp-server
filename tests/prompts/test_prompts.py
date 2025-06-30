@@ -3,7 +3,6 @@
 import pytest
 from typing import Dict
 from arxiv_mcp_server.prompts.handlers import list_prompts, get_prompt
-from mcp.types import GetPromptResult, PromptMessage, TextContent
 
 
 @pytest.mark.asyncio
@@ -12,7 +11,7 @@ async def test_list_prompts():
     prompts = await list_prompts()
     assert len(prompts) == 1
 
-    prompt_names = {p.name for p in prompts}
+    prompt_names = {p["name"] for p in prompts}
     expected_names = {"deep-paper-analysis"}
     assert prompt_names == expected_names
 
@@ -22,14 +21,8 @@ async def test_get_paper_analysis_prompt():
     """Test getting paper analysis prompt."""
     result = await get_prompt("deep-paper-analysis", {"paper_id": "2401.00123"})
 
-    assert isinstance(result, GetPromptResult)
-    assert len(result.messages) == 1
-    message = result.messages[0]
-
-    assert isinstance(message, PromptMessage)
-    assert message.role == "user"
-    assert isinstance(message.content, TextContent)
-    assert "2401.00123" in message.content.text
+    assert isinstance(result, str)
+    assert "2401.00123" in result
 
 
 @pytest.mark.asyncio

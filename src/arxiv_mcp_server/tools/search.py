@@ -84,7 +84,7 @@ async def handle_search(arguments: Dict[str, Any]) -> List[str]:
                 else None
             )
         except (ValueError, TypeError) as e:
-            return [f"Error: Invalid date format - {str(e)}"]
+            return [json.dumps({"error": f"Invalid date format - {str(e)}"})]
 
         # Make requests to ArxivXplorer API with pagination support
         all_results = []
@@ -100,8 +100,9 @@ async def handle_search(arguments: Dict[str, Any]) -> List[str]:
                 response.raise_for_status()
                 
                 raw_results = response.json()
+                print(f"DEBUG: raw_results = {raw_results}")  # Debug output
                 if not isinstance(raw_results, list):
-                    return ["Error: Unexpected response format from ArxivXplorer API"]
+                    return [json.dumps({"error": "Unexpected response format from ArxivXplorer API"})]
                 
                 # If no results returned, we've reached the end
                 if not raw_results:
@@ -144,10 +145,11 @@ async def handle_search(arguments: Dict[str, Any]) -> List[str]:
                 break
 
         response_data = {"total_results": len(results), "papers": results}
+        print(f"DEBUG: response_data = {response_data}")  # Debug output
 
         return [json.dumps(response_data, indent=2)]
 
     except httpx.HTTPError as e:
-        return [f"Error: HTTP request failed - {str(e)}"]
+        return [json.dumps({"error": f"HTTP request failed - {str(e)}"})]
     except Exception as e:
-        return [f"Error: {str(e)}"]
+        return [json.dumps({"error": str(e)})]

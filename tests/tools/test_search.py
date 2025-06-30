@@ -14,7 +14,9 @@ async def test_basic_search(mock_httpx_client):
         result = await handle_search({"query": "test query", "max_results": 1})
 
         assert len(result) == 1
-        content = json.loads(result[0].text)
+        print(f"DEBUG: result[0] = {result[0]}")  # Debug output
+        content = json.loads(result[0])
+        print(f"DEBUG: content = {content}")  # Debug output
         assert content["total_results"] == 1
         paper = content["papers"][0]
         assert paper["id"] == "2103.12345"
@@ -31,7 +33,7 @@ async def test_search_with_categories(mock_httpx_client):
             {"query": "test query", "categories": ["cs.AI", "cs.LG"], "max_results": 1}
         )
 
-        content = json.loads(result[0].text)
+        content = json.loads(result[0])
         assert content["papers"][0]["categories"] == ["cs.AI", "cs.LG"]
 
 
@@ -48,7 +50,7 @@ async def test_search_with_dates(mock_httpx_client):
             }
         )
 
-        content = json.loads(result[0].text)
+        content = json.loads(result[0])
         assert content["total_results"] == 1
         assert len(content["papers"]) == 1
 
@@ -61,7 +63,9 @@ async def test_search_with_invalid_dates(mock_httpx_client):
             {"query": "test query", "date_from": "invalid-date", "max_results": 1}
         )
 
-        assert result[0].text.startswith("Error: Invalid date format")
+        content = json.loads(result[0])
+        assert "error" in content
+        assert "Invalid date format" in content["error"]
 
 
 @pytest.mark.asyncio
@@ -71,7 +75,7 @@ async def test_search_semantic_query_handling(mock_httpx_client):
         # Test that natural language queries are passed through unchanged
         result = await handle_search({"query": "quantum computing applications", "max_results": 1})
         
-        content = json.loads(result[0].text)
+        content = json.loads(result[0])
         assert content["total_results"] == 1
         assert content["papers"][0]["score"] == 0.85
         assert content["papers"][0]["authors"] == ["John Doe", "Jane Smith"]  # Test author parsing
@@ -87,7 +91,7 @@ async def test_search_pagination_multiple_pages(mock_httpx_client_paginated):
         # Verify multiple API calls were made
         assert mock_httpx_client_paginated.call_count() == 2
         
-        content = json.loads(result[0].text)
+        content = json.loads(result[0])
         assert content["total_results"] == 3
         assert len(content["papers"]) == 3
         
@@ -108,7 +112,7 @@ async def test_search_pagination_stops_on_empty_response(mock_httpx_client_pagin
         # Should have made 3 calls: page 1 (2 results), page 2 (1 result), page 3 (empty - stops)
         assert mock_httpx_client_paginated.call_count() == 3
         
-        content = json.loads(result[0].text)
+        content = json.loads(result[0])
         # Should get all available results (3 total)
         assert content["total_results"] == 3
         assert len(content["papers"]) == 3
@@ -125,7 +129,7 @@ async def test_search_pagination_with_category_filtering(mock_httpx_client_pagin
             "max_results": 5
         })
         
-        content = json.loads(result[0].text)
+        content = json.loads(result[0])
         
         # Should include papers with cs.AI category
         filtered_papers = [p for p in content["papers"] if "cs.AI" in p["categories"]]
@@ -144,7 +148,7 @@ async def test_author_string_parsing(mock_httpx_client):
     with patch("httpx.AsyncClient", return_value=mock_httpx_client):
         result = await handle_search({"query": "test", "max_results": 2})
         
-        content = json.loads(result[0].text)
+        content = json.loads(result[0])
         papers = content["papers"]
         
         # Test first paper: "John Doe, Jane Smith" -> ["John Doe", "Jane Smith"]
@@ -160,7 +164,7 @@ async def test_response_format_validation(mock_httpx_client):
     with patch("httpx.AsyncClient", return_value=mock_httpx_client):
         result = await handle_search({"query": "test", "max_results": 1})
         
-        content = json.loads(result[0].text)
+        content = json.loads(result[0])
         
         # Verify top-level structure
         assert "total_results" in content
@@ -221,7 +225,7 @@ async def test_single_author_parsing():
     with patch("httpx.AsyncClient", return_value=mock_client):
         result = await handle_search({"query": "test", "max_results": 1})
         
-        content = json.loads(result[0].text)
+        content = json.loads(result[0])
         paper = content["papers"][0]
         
         # Single author should still be in a list
@@ -239,7 +243,9 @@ async def test_http_error_handling():
     with patch("httpx.AsyncClient", return_value=mock_client):
         result = await handle_search({"query": "test", "max_results": 1})
         
-        assert result[0].text.startswith("Error: HTTP request failed")
+        content = json.loads(result[0])
+        assert "error" in content
+        assert "HTTP request failed" in content["error"]
 
 
 @pytest.mark.asyncio
@@ -257,4 +263,6 @@ async def test_malformed_api_response():
     with patch("httpx.AsyncClient", return_value=mock_client):
         result = await handle_search({"query": "test", "max_results": 1})
         
-        assert "Error: Unexpected response format" in result[0].text
+        content = json.loads(result[0])
+        assert "error" in content
+        assert "Unexpected response format" in content["error"]

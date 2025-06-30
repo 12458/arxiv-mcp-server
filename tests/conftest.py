@@ -134,8 +134,8 @@ def mock_httpx_client(mock_arxivxplorer_response):
     """Create a mock httpx client for ArxivXplorer API testing."""
     async def mock_get(*args, **kwargs):
         mock_response = AsyncMock()
-        # Make json() return the actual data synchronously
-        mock_response.json.return_value = mock_arxivxplorer_response
+        # Make json() return the actual data asynchronously
+        mock_response.json = AsyncMock(return_value=mock_arxivxplorer_response)
         mock_response.raise_for_status.return_value = None
         return mock_response
     
@@ -167,11 +167,11 @@ def mock_httpx_client_paginated(mock_arxivxplorer_response, mock_arxivxplorer_re
             
             # Return different responses based on page number
             if page == 1:
-                mock_response.json.return_value = mock_arxivxplorer_response
+                mock_response.json = AsyncMock(return_value=mock_arxivxplorer_response)
             elif page == 2:
-                mock_response.json.return_value = mock_arxivxplorer_response_page2
+                mock_response.json = AsyncMock(return_value=mock_arxivxplorer_response_page2)
             else:
-                mock_response.json.return_value = mock_arxivxplorer_response_empty
+                mock_response.json = AsyncMock(return_value=mock_arxivxplorer_response_empty)
                 
             return mock_response
         
