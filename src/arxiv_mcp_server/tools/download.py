@@ -1,13 +1,12 @@
 """Download functionality for the arXiv MCP server."""
 
-import arxiv
+import httpx
 import json
 import asyncio
 from pathlib import Path
 from typing import Dict, Any, List, Optional
 from dataclasses import dataclass
 from datetime import datetime
-import mcp.types as types
 from ..config import Settings
 import pymupdf4llm
 import logging
@@ -28,27 +27,6 @@ class ConversionStatus:
     started_at: datetime
     completed_at: Optional[datetime] = None
     error: Optional[str] = None
-
-
-download_tool = types.Tool(
-    name="download_paper",
-    description="Download a paper and create a resource for it",
-    inputSchema={
-        "type": "object",
-        "properties": {
-            "paper_id": {
-                "type": "string",
-                "description": "The arXiv ID of the paper to download",
-            },
-            "check_status": {
-                "type": "boolean",
-                "description": "If true, only check conversion status without downloading",
-                "default": False,
-            },
-        },
-        "required": ["paper_id"],
-    },
-)
 
 
 def get_paper_path(paper_id: str, suffix: str = ".md") -> Path:
@@ -85,7 +63,7 @@ def convert_pdf_to_markdown(paper_id: str, pdf_path: Path) -> None:
             status.error = str(e)
 
 
-async def handle_download(arguments: Dict[str, Any]) -> List[types.TextContent]:
+async def handle_download(arguments: Dict[str, Any]) -> List[str]:
     """Handle paper download and conversion requests."""
     try:
         paper_id = arguments["paper_id"]
@@ -97,60 +75,48 @@ async def handle_download(arguments: Dict[str, Any]) -> List[types.TextContent]:
             if not status:
                 if get_paper_path(paper_id, ".md").exists():
                     return [
-                        types.TextContent(
-                            type="text",
-                            text=json.dumps(
-                                {
-                                    "status": "success",
-                                    "message": "Paper is ready",
-                                    "resource_uri": f"file://{get_paper_path(paper_id, '.md')}",
-                                }
-                            ),
+                        json.dumps(
+                            {
+                                "status": "success",
+                                "message": "Paper is ready",
+                                "resource_uri": f"file://{get_paper_path(paper_id, '.md')}",
+                            }
                         )
                     ]
                 return [
-                    types.TextContent(
-                        type="text",
-                        text=json.dumps(
-                            {
-                                "status": "unknown",
-                                "message": "No download or conversion in progress",
-                            }
-                        ),
+                    json.dumps(
+                        {
+                            "status": "unknown",
+                            "message": "No download or conversion in progress",
+                        }
                     )
                 ]
 
             return [
-                types.TextContent(
-                    type="text",
-                    text=json.dumps(
-                        {
-                            "status": status.status,
-                            "started_at": status.started_at.isoformat(),
-                            "completed_at": (
-                                status.completed_at.isoformat()
-                                if status.completed_at
-                                else None
-                            ),
-                            "error": status.error,
-                            "message": f"Paper conversion {status.status}",
-                        }
-                    ),
+                json.dumps(
+                    {
+                        "status": status.status,
+                        "started_at": status.started_at.isoformat(),
+                        "completed_at": (
+                            status.completed_at.isoformat()
+                            if status.completed_at
+                            else None
+                        ),
+                        "error": status.error,
+                        "message": f"Paper conversion {status.status}",
+                    }
                 )
             ]
 
         # Check if paper is already converted
         if get_paper_path(paper_id, ".md").exists():
             return [
-                types.TextContent(
-                    type="text",
-                    text=json.dumps(
-                        {
-                            "status": "success",
-                            "message": "Paper already available",
-                            "resource_uri": f"file://{get_paper_path(paper_id, '.md')}",
-                        }
-                    ),
+                json.dumps(
+                    {
+                        "status": "success",
+                        "message": "Paper already available",
+                        "resource_uri": f"file://{get_paper_path(paper_id, '.md')}",
+                    }
                 )
             ]
 
@@ -158,30 +124,31 @@ async def handle_download(arguments: Dict[str, Any]) -> List[types.TextContent]:
         if paper_id in conversion_statuses:
             status = conversion_statuses[paper_id]
             return [
-                types.TextContent(
-                    type="text",
-                    text=json.dumps(
-                        {
-                            "status": status.status,
-                            "message": f"Paper conversion {status.status}",
-                            "started_at": status.started_at.isoformat(),
-                        }
-                    ),
+                json.dumps(
+                    {
+                        "status": status.status,
+                        "message": f"Paper conversion {status.status}",
+                        "started_at": status.started_at.isoformat(),
+                    }
                 )
             ]
 
         # Start new download and conversion
         pdf_path = get_paper_path(paper_id, ".pdf")
-        client = arxiv.Client()
+        pdf_url = f"https://arxiv.org/pdf/{paper_id}"
 
         # Initialize status
         conversion_statuses[paper_id] = ConversionStatus(
             paper_id=paper_id, status="downloading", started_at=datetime.now()
         )
 
-        # Download PDF
-        paper = next(client.results(arxiv.Search(id_list=[paper_id])))
-        paper.download_pdf(dirpath=pdf_path.parent, filename=pdf_path.name)
+        # Download PDF using httpx
+        async with httpx.AsyncClient() as client:
+            response = await client.get(pdf_url)
+            response.raise_for_status()
+            
+            with open(pdf_path, "wb") as f:
+                f.write(response.content)
 
         # Update status and start conversion
         status = conversion_statuses[paper_id]
@@ -193,34 +160,38 @@ async def handle_download(arguments: Dict[str, Any]) -> List[types.TextContent]:
         )
 
         return [
-            types.TextContent(
-                type="text",
-                text=json.dumps(
-                    {
-                        "status": "converting",
-                        "message": "Paper downloaded, conversion started",
-                        "started_at": status.started_at.isoformat(),
-                    }
-                ),
+            json.dumps(
+                {
+                    "status": "converting",
+                    "message": "Paper downloaded, conversion started",
+                    "started_at": status.started_at.isoformat(),
+                }
             )
         ]
 
     except StopIteration:
         return [
-            types.TextContent(
-                type="text",
-                text=json.dumps(
-                    {
-                        "status": "error",
-                        "message": f"Paper {paper_id} not found on arXiv",
-                    }
-                ),
+            json.dumps(
+                {
+                    "status": "error",
+                    "message": f"Paper {paper_id} not found on arXiv",
+                }
             )
+        ]
+    except httpx.HTTPStatusError as e:
+        if e.response.status_code == 404:
+            return [
+                json.dumps(
+                    {
+                        "status": "error", 
+                        "message": f"Paper {paper_id} not found on arXiv"
+                    }
+                )
+            ]
+        return [
+            json.dumps({"status": "error", "message": f"Error: {str(e)}"})
         ]
     except Exception as e:
         return [
-            types.TextContent(
-                type="text",
-                text=json.dumps({"status": "error", "message": f"Error: {str(e)}"}),
-            )
+            json.dumps({"status": "error", "message": f"Error: {str(e)}"})
         ]
