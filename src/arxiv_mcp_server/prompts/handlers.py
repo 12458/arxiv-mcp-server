@@ -38,8 +38,22 @@ Present your analysis with the following structure:
 
 async def list_prompts() -> List[Dict]:
     """Handle prompts/list request."""
-    # Filter to only include deep-paper-analysis
-    return [PROMPTS["deep-paper-analysis"]] if "deep-paper-analysis" in PROMPTS else []
+    # Filter to only include deep-paper-analysis and convert to dict format
+    if "deep-paper-analysis" in PROMPTS:
+        prompt = PROMPTS["deep-paper-analysis"]
+        return [{
+            "name": prompt.name,
+            "description": prompt.description,
+            "arguments": [
+                {
+                    "name": arg.name,
+                    "description": arg.description,
+                    "required": arg.required
+                }
+                for arg in prompt.arguments
+            ]
+        }]
+    return []
 
 
 async def get_prompt(

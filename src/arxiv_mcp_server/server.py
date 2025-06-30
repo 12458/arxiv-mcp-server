@@ -19,7 +19,7 @@ logger = logging.getLogger("arxiv-mcp-server")
 logger.setLevel(logging.INFO)
 
 # Create FastMCP server instance
-mcp = FastMCP(settings.APP_NAME)
+mcp = FastMCP(settings.APP_NAME, version=settings.APP_VERSION)
 
 @mcp.tool
 async def search_papers(

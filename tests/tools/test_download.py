@@ -33,12 +33,12 @@ async def test_download_paper_lifecycle(mocker, temp_storage_path):
 
     # Initial download request
     response = await handle_download({"paper_id": paper_id})
-    status = json.loads(response[0].text)
+    status = json.loads(response[0])
     assert status["status"] in ["converting", "success"]
 
     # Check final status
     response = await handle_download({"paper_id": paper_id, "check_status": True})
-    final_status = json.loads(response[0].text)
+    final_status = json.loads(response[0])
     assert final_status["status"] in ["success", "converting"]
 
     # Verify markdown file exists
@@ -58,7 +58,7 @@ async def test_download_existing_paper(temp_storage_path):
         f.write("# Existing Paper\nTest content")
 
     response = await handle_download({"paper_id": paper_id})
-    status = json.loads(response[0].text)
+    status = json.loads(response[0])
     assert status["status"] == "success"
 
 
@@ -68,7 +68,7 @@ async def test_download_nonexistent_paper(mocker):
     mocker.patch("arxiv.Client.results", side_effect=StopIteration())
 
     response = await handle_download({"paper_id": "invalid.12345"})
-    status = json.loads(response[0].text)
+    status = json.loads(response[0])
     assert status["status"] == "error"
     assert "not found on arXiv" in status["message"]
 
@@ -77,5 +77,5 @@ async def test_download_nonexistent_paper(mocker):
 async def test_check_unknown_status():
     """Test checking status of unknown paper."""
     response = await handle_download({"paper_id": "2103.99999", "check_status": True})
-    status = json.loads(response[0].text)
+    status = json.loads(response[0])
     assert status["status"] == "unknown"

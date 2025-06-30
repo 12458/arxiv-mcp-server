@@ -12,9 +12,9 @@ async def test_server_list_prompts():
 
     # Check that all prompts have required fields
     for prompt in prompts:
-        assert prompt.name
-        assert prompt.description
-        assert prompt.arguments is not None
+        assert prompt["name"]
+        assert prompt["description"]
+        assert prompt["arguments"] is not None
 
 
 @pytest.mark.asyncio
@@ -22,10 +22,8 @@ async def test_server_get_analysis_prompt():
     """Test server get_prompt endpoint with analysis prompt."""
     result = await get_prompt("deep-paper-analysis", {"paper_id": "2401.00123"})
 
-    assert len(result.messages) == 1
-    message = result.messages[0]
-    assert message.role == "user"
-    assert "2401.00123" in message.content.text
+    assert isinstance(result, str)
+    assert "2401.00123" in result
 
 
 @pytest.mark.asyncio
