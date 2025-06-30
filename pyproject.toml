@@ -10,14 +10,14 @@ readme = "README.md"
 requires-python = ">=3.11"
 license = { text = "MIT" }
 authors = [
-    { name = "Joseph Blazick", email = "blazickjp@amazon.com" }
+    { name = "Joseph Blazick", email = "blazickjp@amazon.com" },
+    { name = "Shang En Sim", email = sim@shangen.org }
 ]
 dependencies = [
     "arxiv>=2.1.0",
     "httpx>=0.24.0",
     "python-dateutil>=2.8.2",
     "pydantic>=2.8.0",
-    "mcp>=1.2.0",
     "pymupdf4llm>=0.0.17",
     "aiohttp>=3.9.1",
     "python-dotenv>=1.0.0",
@@ -25,7 +25,8 @@ dependencies = [
     "aiofiles>=23.2.1",
     "uvicorn>=0.30.0",
     "sse-starlette>=1.8.2",
-    "anyio>=4.2.0"
+    "anyio>=4.2.0",
+    "fastmcp>=2.9.2",
 ]
 
 [project.optional-dependencies]
