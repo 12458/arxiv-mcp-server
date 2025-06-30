@@ -4,20 +4,9 @@ import json
 from pathlib import Path
 import arxiv
 from typing import Dict, Any, List, Optional
-import mcp.types as types
 from ..config import Settings
 
 settings = Settings()
-
-list_tool = types.Tool(
-    name="list_papers",
-    description="List all existing papers available as resources",
-    inputSchema={
-        "type": "object",
-        "properties": {},
-        "required": [],
-    },
-)
 
 
 def list_papers() -> list[str]:
@@ -27,7 +16,7 @@ def list_papers() -> list[str]:
 
 async def handle_list_papers(
     arguments: Optional[Dict[str, Any]] = None,
-) -> List[types.TextContent]:
+) -> List[str]:
     """Handle requests to list all stored papers."""
     try:
         papers = list_papers()
@@ -50,9 +39,7 @@ async def handle_list_papers(
             ],
         }
 
-        return [
-            types.TextContent(type="text", text=json.dumps(response_data, indent=2))
-        ]
+        return [json.dumps(response_data, indent=2)]
 
     except Exception as e:
-        return [types.TextContent(type="text", text=f"Error: {str(e)}")]
+        return [f"Error: {str(e)}"]

@@ -5,26 +5,9 @@ import json
 from typing import Dict, Any, List
 from datetime import datetime, timezone
 from dateutil import parser
-import mcp.types as types
 from ..config import Settings
 
 settings = Settings()
-
-search_tool = types.Tool(
-    name="search_papers",
-    description="Search for papers on arXiv with advanced filtering",
-    inputSchema={
-        "type": "object",
-        "properties": {
-            "query": {"type": "string"},
-            "max_results": {"type": "integer"},
-            "date_from": {"type": "string"},
-            "date_to": {"type": "string"},
-            "categories": {"type": "array", "items": {"type": "string"}},
-        },
-        "required": ["query"],
-    },
-)
 
 
 def _is_within_date_range(
@@ -78,7 +61,7 @@ def _process_paper(paper: Dict[str, Any]) -> Dict[str, Any]:
     }
 
 
-async def handle_search(arguments: Dict[str, Any]) -> List[types.TextContent]:
+async def handle_search(arguments: Dict[str, Any]) -> List[str]:
     """Handle paper search requests using ArxivXplorer semantic search API.
     
     Uses pagination to fetch enough results to satisfy max_results parameter.
@@ -92,20 +75,16 @@ async def handle_search(arguments: Dict[str, Any]) -> List[types.TextContent]:
         try:
             date_from = (
                 parser.parse(arguments["date_from"]).replace(tzinfo=timezone.utc)
-                if "date_from" in arguments
+                if arguments.get("date_from")
                 else None
             )
             date_to = (
                 parser.parse(arguments["date_to"]).replace(tzinfo=timezone.utc)
-                if "date_to" in arguments
+                if arguments.get("date_to")
                 else None
             )
         except (ValueError, TypeError) as e:
-            return [
-                types.TextContent(
-                    type="text", text=f"Error: Invalid date format - {str(e)}"
-                )
-            ]
+            return [f"Error: Invalid date format - {str(e)}"]
 
         # Make requests to ArxivXplorer API with pagination support
         all_results = []
@@ -120,13 +99,9 @@ async def handle_search(arguments: Dict[str, Any]) -> List[types.TextContent]:
                 )
                 response.raise_for_status()
                 
-                raw_results = await response.json()
+                raw_results = response.json()
                 if not isinstance(raw_results, list):
-                    return [
-                        types.TextContent(
-                            type="text", text="Error: Unexpected response format from ArxivXplorer API"
-                        )
-                    ]
+                    return ["Error: Unexpected response format from ArxivXplorer API"]
                 
                 # If no results returned, we've reached the end
                 if not raw_results:
@@ -134,11 +109,6 @@ async def handle_search(arguments: Dict[str, Any]) -> List[types.TextContent]:
                 
                 all_results.extend(raw_results)
                 page += 1
-                
-                # Stop if we got fewer results than expected (likely last page)
-                # Only break if we have enough results or got very few results (< 5)
-                if len(raw_results) < 5 and len(all_results) >= max_results:
-                    break
 
         # Process and filter results
         results = []
@@ -175,11 +145,9 @@ async def handle_search(arguments: Dict[str, Any]) -> List[types.TextContent]:
 
         response_data = {"total_results": len(results), "papers": results}
 
-        return [
-            types.TextContent(type="text", text=json.dumps(response_data, indent=2))
-        ]
+        return [json.dumps(response_data, indent=2)]
 
     except httpx.HTTPError as e:
-        return [types.TextContent(type="text", text=f"Error: HTTP request failed - {str(e)}")]
+        return [f"Error: HTTP request failed - {str(e)}"]
     except Exception as e:
-        return [types.TextContent(type="text", text=f"Error: {str(e)}")]
+        return [f"Error: {str(e)}"]

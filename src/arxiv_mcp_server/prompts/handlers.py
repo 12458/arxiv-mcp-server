@@ -1,7 +1,6 @@
 """Handlers for prompt-related requests with paper analysis functionality."""
 
 from typing import List, Dict, Optional
-from mcp.types import Prompt, PromptMessage, TextContent, GetPromptResult
 from .prompts import PROMPTS
 from .deep_research_analysis_prompt import PAPER_ANALYSIS_PROMPT
 
@@ -37,7 +36,7 @@ Present your analysis with the following structure:
 """
 
 
-async def list_prompts() -> List[Prompt]:
+async def list_prompts() -> List[Dict]:
     """Handle prompts/list request."""
     # Filter to only include deep-paper-analysis
     return [PROMPTS["deep-paper-analysis"]] if "deep-paper-analysis" in PROMPTS else []
@@ -45,7 +44,7 @@ async def list_prompts() -> List[Prompt]:
 
 async def get_prompt(
     name: str, arguments: Dict[str, str] | None = None, session_id: Optional[str] = None
-) -> GetPromptResult:
+) -> str:
     """Handle prompts/get request for paper analysis.
 
     Args:
@@ -54,7 +53,7 @@ async def get_prompt(
         session_id: Optional user session ID for context persistence
 
     Returns:
-        GetPromptResult: The resulting prompt with messages
+        str: The resulting prompt text
 
     Raises:
         ValueError: If prompt not found or arguments invalid
@@ -91,14 +90,4 @@ async def get_prompt(
     # Track this analysis in context (for global context only)
     _research_context.paper_analyses[paper_id] = {"analysis": "complete"}
 
-    return GetPromptResult(
-        messages=[
-            PromptMessage(
-                role="user",
-                content=TextContent(
-                    type="text",
-                    text=f"Analyze paper {paper_id}.{previous_papers_context}\n\n{OUTPUT_STRUCTURE}\n\n{PAPER_ANALYSIS_PROMPT}",
-                ),
-            )
-        ]
-    )
+    return f"Analyze paper {paper_id}.{previous_papers_context}\n\n{OUTPUT_STRUCTURE}\n\n{PAPER_ANALYSIS_PROMPT}"
