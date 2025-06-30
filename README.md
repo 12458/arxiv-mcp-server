@@ -14,8 +14,8 @@ The ArXiv MCP Server provides a bridge between AI assistants and arXiv's researc
 
 <div align="center">
   
-🤝 **[Contribute](https://github.com/blazickjp/arxiv-mcp-server/blob/main/CONTRIBUTING.md)** • 
-📝 **[Report Bug](https://github.com/blazickjp/arxiv-mcp-server/issues)**
+🤝 **[Contribute](https://github.com/12458/arxiv-mcp-server/blob/main/CONTRIBUTING.md)** • 
+📝 **[Report Bug](https://github.com/12458/arxiv-mcp-server/issues)**
 
 <a href="https://www.pulsemcp.com/servers/blazickjp-arxiv-mcp-server"><img src="https://www.pulsemcp.com/badge/top-pick/blazickjp-arxiv-mcp-server" width="400" alt="Pulse MCP Badge"></a>
 </div>
