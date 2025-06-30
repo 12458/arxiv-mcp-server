@@ -74,3 +74,111 @@ def mock_http_session(mock_http_response):
     session.get.return_value = mock_http_response
     session.__aenter__.return_value = session
     return session
+
+
+@pytest.fixture
+def mock_arxivxplorer_response():
+    """Create a mock ArxivXplorer API response for testing (page 1)."""
+    return [
+        {
+            "id": "2103.12345",
+            "journal": "arxiv",
+            "title": "Test Paper",
+            "abstract": "Test abstract",
+            "authors": "John Doe, Jane Smith",
+            "date": "2023-01-01T00:00:00",
+            "categories": ["cs.AI", "cs.LG"],
+            "short_author": "J. Doe, et al.",
+            "score": 0.85
+        },
+        {
+            "id": "2103.12346",
+            "journal": "arxiv",
+            "title": "Another Test Paper",
+            "abstract": "Another test abstract",
+            "authors": "Alice Brown, Bob Wilson",
+            "date": "2023-01-02T00:00:00",
+            "categories": ["cs.LG"],
+            "short_author": "A. Brown, et al.",
+            "score": 0.75
+        }
+    ]
+
+
+@pytest.fixture
+def mock_arxivxplorer_response_page2():
+    """Create a mock ArxivXplorer API response for testing (page 2)."""
+    return [
+        {
+            "id": "2103.12347",
+            "journal": "arxiv",
+            "title": "Third Test Paper",
+            "abstract": "Third test abstract",
+            "authors": "Charlie Davis",
+            "date": "2023-01-03T00:00:00",
+            "categories": ["cs.AI"],
+            "short_author": "C. Davis",
+            "score": 0.65
+        }
+    ]
+
+
+@pytest.fixture
+def mock_arxivxplorer_response_empty():
+    """Create an empty mock ArxivXplorer API response for testing pagination end."""
+    return []
+
+
+@pytest.fixture
+def mock_httpx_client(mock_arxivxplorer_response):
+    """Create a mock httpx client for ArxivXplorer API testing."""
+    async def mock_get(*args, **kwargs):
+        mock_response = AsyncMock()
+        # Make json() return the actual data, not a coroutine
+        mock_response.json = AsyncMock(return_value=mock_arxivxplorer_response)
+        mock_response.raise_for_status = AsyncMock(return_value=None)
+        return mock_response
+    
+    mock_client = AsyncMock()
+    mock_client.get = mock_get
+    mock_client.__aenter__.return_value = mock_client
+    mock_client.__aexit__.return_value = None
+    
+    return mock_client
+
+
+@pytest.fixture
+def mock_httpx_client_paginated(mock_arxivxplorer_response, mock_arxivxplorer_response_page2, mock_arxivxplorer_response_empty):
+    """Create a mock httpx client that supports pagination testing."""
+    call_count = 0
+    
+    async def get_side_effect(*args, **kwargs):
+        nonlocal call_count
+        call_count += 1
+        
+        # Extract page parameter from params
+        params = kwargs.get('params', {})
+        page = params.get('page', 1)
+        
+        mock_response = AsyncMock()
+        mock_response.raise_for_status = AsyncMock(return_value=None)
+        
+        # Return different responses based on page number
+        if page == 1:
+            mock_response.json = AsyncMock(return_value=mock_arxivxplorer_response)
+        elif page == 2:
+            mock_response.json = AsyncMock(return_value=mock_arxivxplorer_response_page2)
+        else:
+            mock_response.json = AsyncMock(return_value=mock_arxivxplorer_response_empty)
+            
+        return mock_response
+    
+    mock_client = AsyncMock()
+    mock_client.get = get_side_effect
+    mock_client.__aenter__.return_value = mock_client
+    mock_client.__aexit__.return_value = None
+    
+    # Add a way to check call count
+    mock_client.call_count = lambda: call_count
+    
+    return mock_client
