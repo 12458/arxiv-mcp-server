@@ -11,7 +11,7 @@ requires-python = ">=3.11"
 license = { text = "MIT" }
 authors = [
     { name = "Joseph Blazick", email = "blazickjp@amazon.com" },
-    { name = "Shang En Sim", email = sim@shangen.org }
+    { name = "Shang En Sim", email = "sim@shangen.org" }
 ]
 dependencies = [
     "arxiv>=2.1.0",
@@ -43,7 +43,6 @@ dev = [
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
-asyncio_fixture_loop_scope = "function"  # Added this line
 testpaths = ["tests"]
 addopts = "-v --cov=arxiv_mcp_server"
 
