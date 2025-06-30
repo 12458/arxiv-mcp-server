@@ -10,7 +10,7 @@
 
 > 🔍 Enable AI assistants to search and access arXiv papers through a simple MCP interface.
 
-The ArXiv MCP Server provides a bridge between AI assistants and arXiv's research repository through the Model Context Protocol (MCP). It allows AI models to search for papers and access their content in a programmatic way.
+The ArXiv MCP Server provides a bridge between AI assistants and arXiv's research repository through the Model Context Protocol (MCP). Built with FastMCP v2 for optimal performance and developer experience, it allows AI models to search for papers and access their content in a programmatic way.
 
 <div align="center">
   
@@ -27,6 +27,9 @@ The ArXiv MCP Server provides a bridge between AI assistants and arXiv's researc
 - 📋 **Paper Listing**: View all downloaded papers
 - 🗃️ **Local Storage**: Papers are saved locally for faster access
 - 📝 **Prompts**: A Set of Research Prompts
+- ⚡ **FastMCP v2**: Built with the latest FastMCP framework for optimal performance
+- 🔧 **Multiple Transports**: Support for STDIO, HTTP, and SSE transports
+- 🛡️ **Type Safety**: Automatic schema generation from Python type hints
 
 ## 🚀 Quick Start
 
@@ -58,6 +61,21 @@ source .venv/bin/activate
 
 # Install with test dependencies
 uv pip install -e ".[test]"
+```
+
+### Running the Server
+
+The server supports multiple transport protocols:
+
+```bash
+# STDIO (default) - for local tools and command-line scripts
+python -m src.arxiv_mcp_server.server
+
+# HTTP - for web deployments
+python -m src.arxiv_mcp_server.server --transport http --host 0.0.0.0 --port 8000
+
+# SSE - for compatibility with existing SSE clients
+python -m src.arxiv_mcp_server.server --transport sse --host 0.0.0.0 --port 8000
 ```
 
 ### 🔌 MCP Integration
@@ -101,7 +119,7 @@ For Development:
 
 ## 💡 Available Tools
 
-The server provides four main tools:
+The server provides four main tools built with FastMCP's decorator-based approach:
 
 ### 1. Paper Search
 Search for papers with optional filters:
@@ -110,8 +128,9 @@ Search for papers with optional filters:
 result = await call_tool("search_papers", {
     "query": "transformer architecture",
     "max_results": 10,
-    "date_from": "2023-01-01",
-    "categories": ["cs.AI", "cs.LG"]
+    "date_from": "2023-01-01",  # Optional: YYYY-MM-DD format
+    "date_to": "2024-01-01",    # Optional: YYYY-MM-DD format
+    "categories": ["cs.AI", "cs.LG"]  # Optional: arXiv categories
 })
 ```
 
@@ -120,7 +139,8 @@ Download a paper by its arXiv ID:
 
 ```python
 result = await call_tool("download_paper", {
-    "paper_id": "2401.12345"
+    "paper_id": "2401.12345",
+    "check_status": False  # Optional: check conversion status only
 })
 ```
 
@@ -148,8 +168,10 @@ The server offers specialized prompts to help analyze academic papers:
 A comprehensive workflow for analyzing academic papers that only requires a paper ID:
 
 ```python
-result = await call_prompt("deep-paper-analysis", {
-    "paper_id": "2401.12345"
+result = await call_prompt("deep_paper_analysis", {
+    "paper_id": "2401.12345",
+    "expertise_level": "intermediate",  # Optional: beginner, intermediate, expert
+    "analysis_focus": "general"         # Optional: general, methodology, results, etc.
 })
 ```
 
@@ -181,6 +203,29 @@ Run the test suite:
 python -m pytest
 ```
 
+### Testing with FastMCP Client
+
+You can also test the server using FastMCP's in-memory client:
+
+```python
+from fastmcp import Client
+from src.arxiv_mcp_server.server import mcp
+
+async with Client(mcp) as client:
+    # Test search functionality
+    result = await client.call_tool("search_papers", {
+        "query": "machine learning",
+        "max_results": 3
+    })
+    print(result.text)
+    
+    # Test prompt functionality
+    prompt_result = await client.get_prompt("deep_paper_analysis", {
+        "paper_id": "2301.12345"
+    })
+    print(prompt_result.text)
+```
+
 ## 📄 License
 
 Released under the MIT License. See the LICENSE file for details.
@@ -194,6 +239,15 @@ Made with ❤️ by the Pearl Labs Team
 <a href="https://glama.ai/mcp/servers/04dtxi5i5n"><img width="380" height="200" src="https://glama.ai/mcp/servers/04dtxi5i5n/badge" alt="ArXiv Server MCP server" /></a>
 </div>
 
-## Attirbutions
+## 🚀 FastMCP Migration
+
+This server has been migrated to FastMCP v2, providing:
+- **Simplified Development**: Decorator-based tool and prompt definitions
+- **Type Safety**: Automatic schema generation from Python type hints
+- **Better Performance**: Optimized MCP implementation
+- **Multiple Transports**: Support for STDIO, HTTP, and SSE
+- **Enhanced Testing**: In-memory testing capabilities
+
+## Attributions
 
 Thank you to arXiv for use of its open access interoperability.
