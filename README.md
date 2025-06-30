@@ -49,7 +49,7 @@ For development:
 
 ```bash
 # Clone and set up development environment
-git clone https://github.com/blazickjp/arxiv-mcp-server.git
+git clone https://github.com/12458/arxiv-mcp-server.git
 cd arxiv-mcp-server
 
 # Create and activate virtual environment
@@ -193,3 +193,7 @@ Made with ❤️ by the Pearl Labs Team
 
 <a href="https://glama.ai/mcp/servers/04dtxi5i5n"><img width="380" height="200" src="https://glama.ai/mcp/servers/04dtxi5i5n/badge" alt="ArXiv Server MCP server" /></a>
 </div>
+
+## Attirbutions
+
+Thank you to arXiv for use of its open access interoperability.
