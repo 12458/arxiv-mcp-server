@@ -59,13 +59,13 @@ The server supports multiple transport protocols:
 
 ```bash
 # STDIO (default) - for local tools and command-line scripts
-python -m src.arxiv_mcp_server.server
+uv run python -m arxiv_mcp_server.server
 
 # HTTP - for web deployments
-python -m src.arxiv_mcp_server.server --transport http --host 0.0.0.0 --port 8000
+uv run python -m arxiv_mcp_server.server --transport http --host 0.0.0.0 --port 8000
 
 # SSE - for compatibility with existing SSE clients
-python -m src.arxiv_mcp_server.server --transport sse --host 0.0.0.0 --port 8000
+uv run python -m arxiv_mcp_server.server --transport sse --host 0.0.0.0 --port 8000
 ```
 
 ### 🔌 MCP Integration
